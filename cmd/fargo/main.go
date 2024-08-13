@@ -4,6 +4,7 @@
 package main
 
 import (
+	"github.com/playbymail/fargo"
 	"github.com/spf13/cobra"
 	"log"
 )
@@ -19,6 +20,12 @@ func main() {
 func Execute() error {
 	cmdRoot.AddCommand(cmdVersion)
 
+	cmdRoot.PersistentFlags().StringVar(&argsRoot.seed, "seed", "", "optional seed for the PRNG")
+
+	if argsRoot.seed != "" {
+		fargo.WithSeed(argsRoot.seed, true)
+	}
+
 	return cmdRoot.Execute()
 }
 
@@ -29,4 +36,11 @@ var cmdRoot = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Printf("Hello from root command\n")
 	},
+}
+
+var argsRoot = struct {
+	e    *fargo.Engine
+	seed string
+}{
+	seed: "0xdeadbeef^0xcafebabe",
 }
