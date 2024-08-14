@@ -121,9 +121,13 @@ func (c *Catalog_t) closestNeighbor(coords Coordinates) *StarSystem_t {
 // SaveAsPNG writes the catalog to a PNG file. The PNG file is a map
 // of the star systems in the catalog using the X and Y coordinates of
 // each star system. Each star system is colored based on its age.
+// The stars that are furthest away from the center of the map are
+// rendered first.
 func (c *Catalog_t) SaveAsPNG(filename string) error {
 	// Define the image size
 	width, height := 4*1024.0, 4*1024.0
+
+	//camera := Coordinates{}
 
 	// Create a new gg context
 	dc := gg.NewContext(int(width), int(height))
@@ -144,6 +148,11 @@ func (c *Catalog_t) SaveAsPNG(filename string) error {
 	}
 	// adjust the maximum X and Y to include a little extra space
 	maxX, maxY = maxX+4, maxY+4
+
+	// Sort star systems by distance from center (furthest first)
+	sort.Slice(c.StarSystems, func(i, j int) bool {
+		return c.StarSystems[i].distance > c.StarSystems[j].distance
+	})
 
 	// Draw the star systems
 	for _, ss := range c.StarSystems {
