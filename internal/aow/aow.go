@@ -5,12 +5,10 @@ package aow
 
 import (
 	"fmt"
-	"image"
-	"image/png"
+	"github.com/fogleman/gg"
 	"log"
 	"math"
 	"math/rand/v2"
-	"os"
 	"sort"
 )
 
@@ -125,10 +123,14 @@ func (c *Catalog_t) closestNeighbor(coords Coordinates) *StarSystem_t {
 // each star system. Each star system is colored based on its age.
 func (c *Catalog_t) SaveAsPNG(filename string) error {
 	// Define the image size
-	width, height := 1000, 1000
+	width, height := 4*1024.0, 4*1024.0
 
-	// Create a new image
-	img := image.NewRGBA(image.Rect(0, 0, width, height))
+	// Create a new gg context
+	dc := gg.NewContext(int(width), int(height))
+
+	// Set the background color to black
+	dc.SetRGB(0, 0, 0)
+	dc.Clear()
 
 	// Find the maximum X and Y coordinates to scale the star positions
 	var maxX, maxY float64
@@ -140,31 +142,28 @@ func (c *Catalog_t) SaveAsPNG(filename string) error {
 			maxY = math.Abs(ss.Coordinates.Y)
 		}
 	}
+	// adjust the maximum X and Y to include a little extra space
+	maxX, maxY = maxX+4, maxY+4
 
 	// Draw the star systems
 	for _, ss := range c.StarSystems {
-		x := int((ss.Coordinates.X + maxX) * float64(width) / (2 * maxX))
-		y := int((ss.Coordinates.Y + maxY) * float64(height) / (2 * maxY))
+		x := (ss.Coordinates.X + maxX) * width / (2 * maxX)
+		y := (ss.Coordinates.Y + maxY) * height / (2 * maxY)
 
 		// Color from the StarColor_t of the star system
 		rgba := ss.color.RGBA()
+		dc.SetRGBA255(int(rgba.R), int(rgba.G), int(rgba.B), int(rgba.A))
 
-		// Draw a filled circle with a radius of 4 pixels (8 pixels wide)
-		for dy := -4; dy <= 4; dy++ {
-			for dx := -4; dx <= 4; dx++ {
-				if dx*dx+dy*dy <= 16 {
-					img.Set(x+dx, y+dy, rgba)
-				}
-			}
-		}
+		// Draw a filled circle with a radius of 9 pixels
+		dc.DrawCircle(x, y, 9)
+		dc.Fill()
+
+		// Add label showing Z value, position slightly to the right and below the star
+		//dc.SetRGB(1, 1, 1) // Set color to white
+		label := fmt.Sprintf("(%+.1f)", ss.Coordinates.Z)
+		dc.DrawString(label, x+8, y+6)
 	}
 
-	// Save the image to a file
-	f, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	return png.Encode(f, img)
+	// Save the image as PNG
+	return dc.SavePNG(filename)
 }
