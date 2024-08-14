@@ -5,9 +5,12 @@ package aow
 
 import (
 	"fmt"
+	"image"
+	"image/png"
 	"log"
 	"math"
 	"math/rand/v2"
+	"os"
 	"sort"
 )
 
@@ -28,6 +31,7 @@ type Catalog_t struct {
 func NewSolClusterCatalog(n int, tweak float64, prng *rand.Rand) (*Catalog_t, error) {
 	const (
 		cubicParsecsPerStarSystem = 12.0
+		lightYearsPerParsec       = 3.2615638
 	)
 
 	catalog := Catalog_t{
@@ -74,6 +78,7 @@ func NewSolClusterCatalog(n int, tweak float64, prng *rand.Rand) (*Catalog_t, er
 				Age: v.value.BaseAge + v.value.AgeRange*rollPercentile(prng),
 				// use the generated position for the star system
 				Coordinates: coords,
+				color:       StarColor_t(prng.IntN(int(YellowWhite))),
 			})
 		}
 	}
@@ -82,7 +87,7 @@ func NewSolClusterCatalog(n int, tweak float64, prng *rand.Rand) (*Catalog_t, er
 
 	// convert coordinates from parsecs to light years
 	for _, ss := range catalog.StarSystems {
-		ss.Coordinates = ss.Coordinates.Scale(3.2615638)
+		ss.Coordinates = ss.Coordinates.Scale(lightYearsPerParsec)
 		ss.distance = ss.Coordinates.DistanceTo(center)
 	}
 
@@ -113,4 +118,53 @@ func (c *Catalog_t) closestNeighbor(coords Coordinates) *StarSystem_t {
 	}
 	return closest
 
+}
+
+// SaveAsPNG writes the catalog to a PNG file. The PNG file is a map
+// of the star systems in the catalog using the X and Y coordinates of
+// each star system. Each star system is colored based on its age.
+func (c *Catalog_t) SaveAsPNG(filename string) error {
+	// Define the image size
+	width, height := 1000, 1000
+
+	// Create a new image
+	img := image.NewRGBA(image.Rect(0, 0, width, height))
+
+	// Find the maximum X and Y coordinates to scale the star positions
+	var maxX, maxY float64
+	for _, ss := range c.StarSystems {
+		if math.Abs(ss.Coordinates.X) > maxX {
+			maxX = math.Abs(ss.Coordinates.X)
+		}
+		if math.Abs(ss.Coordinates.Y) > maxY {
+			maxY = math.Abs(ss.Coordinates.Y)
+		}
+	}
+
+	// Draw the star systems
+	for _, ss := range c.StarSystems {
+		x := int((ss.Coordinates.X + maxX) * float64(width) / (2 * maxX))
+		y := int((ss.Coordinates.Y + maxY) * float64(height) / (2 * maxY))
+
+		// Color from the StarColor_t of the star system
+		rgba := ss.color.RGBA()
+
+		// Draw a filled circle with a radius of 4 pixels (8 pixels wide)
+		for dy := -4; dy <= 4; dy++ {
+			for dx := -4; dx <= 4; dx++ {
+				if dx*dx+dy*dy <= 16 {
+					img.Set(x+dx, y+dy, rgba)
+				}
+			}
+		}
+	}
+
+	// Save the image to a file
+	f, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	return png.Encode(f, img)
 }

@@ -47,7 +47,11 @@ The scale factor is a multiplier that expands or shrinks the radius of the clust
 		log.Printf("create: cluster: systems %8d\n", int(argsCreateCluster.systemsPerRace))
 		log.Printf("create: cluster: scale   %8.2f\n", argsCreateCluster.scale)
 
-		_, err := fargo.NewCluster(int(math.Ceil(float64(argsCreateCluster.numberOfRaces)*argsCreateCluster.systemsPerRace)), argsRoot.seed)
+		cluster, err := fargo.NewCluster(int(math.Ceil(float64(argsCreateCluster.numberOfRaces)*argsCreateCluster.systemsPerRace)), argsRoot.seed)
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = cluster.SaveAsPNG("cluster.png")
 		if err != nil {
 			log.Fatal(err)
 		}
