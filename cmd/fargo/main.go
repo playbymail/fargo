@@ -18,9 +18,14 @@ func main() {
 }
 
 func Execute() error {
-	cmdRoot.AddCommand(cmdVersion)
+	cmdRoot.AddCommand(cmdCreate, cmdVersion)
+	cmdCreate.AddCommand(cmdCreateCluster)
 
 	cmdRoot.PersistentFlags().StringVar(&argsRoot.seed, "seed", "", "optional seed for the PRNG")
+
+	cmdCreateCluster.Flags().IntVar(&argsCreateCluster.numberOfRaces, "races", fargo.DefaultNumberOfRaces, "number of races")
+	cmdCreateCluster.Flags().Float64Var(&argsCreateCluster.systemsPerRace, "systems-per-race", 6, "number of systems per race")
+	cmdCreateCluster.Flags().Float64Var(&argsCreateCluster.scale, "scale", fargo.DefaultRadiusScaleFactor, "cluster scale factor")
 
 	if argsRoot.seed != "" {
 		fargo.WithSeed(argsRoot.seed, true)
