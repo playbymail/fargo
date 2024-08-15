@@ -16,18 +16,18 @@ type pinfo struct {
 type PLANINFO = pinfo
 
 type FLAGINFO struct {
-	x, y, z bool
-	r       bool
-	s       bool
-	c       bool
-	n       bool
-	d       bool
-	l, L    bool
-	h       bool
-	g       bool
-	o       bool
-	p       bool
-	t       bool
+	suppressGridLines bool
+	x, y, z           bool
+	r                 bool
+	s                 bool
+	c                 bool
+	n                 bool
+	d                 bool
+	l, L              bool
+	h                 bool
+	o                 bool
+	p                 bool
+	t                 bool
 }
 
 func (f *FLAGINFO) XLABEL() byte {

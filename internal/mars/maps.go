@@ -340,22 +340,22 @@ func (m *Map) drawgrid(lim *LIMINFO, flag *FLAGINFO, gridsize *int) {
 	_, _ = fmt.Fprintf(m.outfile, "/xlab %d def\n", int(xbegin))
 	_, _ = fmt.Fprintf(m.outfile, "/ylab %d def\n", int(ybegin))
 	_, _ = fmt.Fprintf(m.outfile, "%f %f 370 { /x exch def\n", psxbegin, psgridsize)
-	if !flag.g {
-		m.outfile.WriteString("x -250 moveto gsave [1 2] 0 setdash 0.001 setlinewidth\n")
-		m.outfile.WriteString("0 500 rlineto stroke grestore\n")
-	} else {
+	if flag.suppressGridLines {
 		m.outfile.WriteString("x -250 moveto gsave 0.001 setlinewidth 0 5 rlineto stroke\n")
 		m.outfile.WriteString("x 250 moveto 0 -5 rlineto stroke grestore\n")
+	} else {
+		m.outfile.WriteString("x -250 moveto gsave [1 2] 0 setdash 0.001 setlinewidth\n")
+		m.outfile.WriteString("0 500 rlineto stroke grestore\n")
 	}
 	m.outfile.WriteString("x -260 moveto xlab str cvs centre show\n")
 	m.outfile.WriteString("/xlab xlab grid add def } for\n")
 	_, _ = fmt.Fprintf(m.outfile, "%f %f 250 { /y exch def\n", psybegin, psgridsize)
-	if !flag.g {
-		m.outfile.WriteString("-130 y moveto gsave [1 2] 0 setdash 0.001 setlinewidth\n")
-		m.outfile.WriteString("500 0 rlineto stroke grestore\n")
-	} else {
+	if flag.suppressGridLines {
 		m.outfile.WriteString("-130 y moveto gsave 0.001 setlinewidth 5 0 rlineto stroke\n")
 		m.outfile.WriteString("370 y moveto -5 0 rlineto stroke grestore\n")
+	} else {
+		m.outfile.WriteString("-130 y moveto gsave [1 2] 0 setdash 0.001 setlinewidth\n")
+		m.outfile.WriteString("500 0 rlineto stroke grestore\n")
 	}
 	m.outfile.WriteString("-135 y moveto ylab str cvs right show\n")
 	m.outfile.WriteString("/ylab ylab grid add def } for\n")
@@ -384,25 +384,25 @@ func (m *Map) drawgrid3D(lim *LIMINFO, flag *FLAGINFO, gridsize *int) {
 	m.outfile.WriteString("5 roman\n")
 	_, _ = fmt.Fprintf(m.outfile, "%f %f %f { /x exch def\n", psxbegin, psgridsize, TPSA-130)
 	_, _ = fmt.Fprintf(m.outfile, "x %f moveto\n", psplaneheight)
-	if !flag.g {
-		m.outfile.WriteString("gsave [1 2] 0 setdash 0.001 setlinewidth\n")
-		_, _ = fmt.Fprintf(m.outfile, "%f %f rlineto stroke grestore\n", TPSB, TPSB)
-	} else {
+	if flag.suppressGridLines {
 		m.outfile.WriteString("gsave 0.001 setlinewidth 3 3 rlineto stroke\n")
 		_, _ = fmt.Fprintf(m.outfile, "x %f add %f moveto -3 -3 rlineto stroke grestore\n", TPSB, psplaneheight+TPSB)
+	} else {
+		m.outfile.WriteString("gsave [1 2] 0 setdash 0.001 setlinewidth\n")
+		_, _ = fmt.Fprintf(m.outfile, "%f %f rlineto stroke grestore\n", TPSB, TPSB)
 	}
 	_, _ = fmt.Fprintf(m.outfile, "x %f moveto xlab str cvs centre show\n", psplaneheight-6)
 	m.outfile.WriteString("/xlab xlab grid add def } for\n")
 	psgridsize = TPSB / numgrids /*  Trust me on this one  */
 	_, _ = fmt.Fprintf(m.outfile, "%f %f %f { /y exch def\n", psybegin, psgridsize, psplaneheight+TPSB)
 	_, _ = fmt.Fprintf(m.outfile, "-130 %f sub y add y moveto\n", psplaneheight)
-	if !flag.g {
-		m.outfile.WriteString("gsave [1 2] 0 setdash 0.001 setlinewidth\n")
-		_, _ = fmt.Fprintf(m.outfile, "%f 0 rlineto stroke grestore\n", TPSA)
-	} else {
+	if flag.suppressGridLines {
 		m.outfile.WriteString("gsave 0.001 setlinewidth 5 0 rlineto stroke\n")
 		_, _ = fmt.Fprintf(m.outfile, "-130 %f sub y add y moveto\n", psplaneheight+TPSA)
 		m.outfile.WriteString("-5 0 rlineto stroke grestore\n")
+	} else {
+		m.outfile.WriteString("gsave [1 2] 0 setdash 0.001 setlinewidth\n")
+		_, _ = fmt.Fprintf(m.outfile, "%f 0 rlineto stroke grestore\n", TPSA)
 	}
 	_, _ = fmt.Fprintf(m.outfile, "-135 %f sub y add y moveto ylab str cvs right show\n", psplaneheight)
 	m.outfile.WriteString("/ylab ylab grid add def } for\n")

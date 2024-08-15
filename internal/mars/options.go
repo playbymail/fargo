@@ -156,6 +156,13 @@ func WithStereoMap() Option {
 	}
 }
 
+func WithSuppressGridLines() Option {
+	return func(m *Map) error {
+		m.flag.suppressGridLines = true
+		return nil
+	}
+}
+
 func WithVerticalReferencePlane() Option {
 	return func(m *Map) error {
 		m.flag.r = true
@@ -168,13 +175,6 @@ func WithVerticalReferencePlane() Option {
 func WithoutDataFilePages() Option {
 	return func(m *Map) error {
 		m.flag.d = true
-		return nil
-	}
-}
-
-func WithOutGridLines() Option {
-	return func(m *Map) error {
-		m.flag.g = true
 		return nil
 	}
 }
