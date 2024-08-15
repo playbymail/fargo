@@ -5,6 +5,7 @@ package main
 import (
 	"fmt"
 	"github.com/playbymail/fargo"
+	"github.com/playbymail/fargo/internal/mars"
 	"github.com/spf13/cobra"
 	"log"
 	"math"
@@ -53,6 +54,41 @@ The scale factor is a multiplier that expands or shrinks the radius of the clust
 		}
 		err = cluster.SaveAsPNG("cluster.png")
 		if err != nil {
+			log.Fatal(err)
+		}
+
+		if marp, err := mars.NewMap(cluster,
+			mars.WithOutput("mars-2d.ps"),
+			mars.With2DLimits(33, 44),
+			mars.WithMapWidth(45),
+			mars.WithoutDataFilePages(),
+		); err != nil {
+			log.Fatal(err)
+		} else if err = marp.Generate("mars-2d.ps"); err != nil {
+			log.Fatal(err)
+		}
+
+		if marp, err := mars.NewMap(cluster,
+			mars.WithOutput("mars-stereo.ps"),
+			mars.WithStereoMap(),
+			mars.With2DLimits(33, 44),
+			mars.WithMapWidth(45),
+			mars.WithoutDataFilePages(),
+		); err != nil {
+			log.Fatal(err)
+		} else if err = marp.Generate("mars-stereo.ps"); err != nil {
+			log.Fatal(err)
+		}
+
+		if marp, err := mars.NewMap(cluster,
+			mars.WithOutput("mars-3d.ps"),
+			mars.With3DMap(),
+			mars.With3DLimits(44, 44, 44),
+			mars.WithMapWidth(45),
+			mars.WithoutDataFilePages(),
+		); err != nil {
+			log.Fatal(err)
+		} else if err = marp.Generate("mars-3d.ps"); err != nil {
 			log.Fatal(err)
 		}
 	},
